@@ -7,12 +7,22 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function GET(request: NextRequest) {
+  // Vercel Cronからのリクエストを検証
   const authHeader = request.headers.get('authorization');
+  const { searchParams } = new URL(request.url);
+  const secretParam = searchParams.get('secret');
   
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    if (process.env.NODE_ENV === 'production') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  // 認証チェック（3つの方法のいずれかでOK）
+  const isAuthorized = 
+    // 1. CRON_SECRETが未設定の場合はスキップ
+    !process.env.CRON_SECRET ||
+    // 2. Authorizationヘッダーでの認証（Vercel Cron用）
+    authHeader === `Bearer ${process.env.CRON_SECRET}` ||
+    // 3. クエリパラメータでの認証（手動実行用）
+    secretParam === process.env.CRON_SECRET;
+
+  if (!isAuthorized) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
