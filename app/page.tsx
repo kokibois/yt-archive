@@ -1,7 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Archive, VideoItem } from '@/types';
+
+interface VideoItem {
+  videoId: string;
+  title: string;
+  thumbnail: string;
+  url: string;
+  position: number;
+  publishedAt: string;
+}
+
+interface Archive {
+  id: string;
+  date: string;
+  playlistId: string;
+  playlistTitle: string;
+  totalCount: number;
+  videos: VideoItem[];
+  createdAt: string;
+}
 
 export default function Home() {
   const [archives, setArchives] = useState<Archive[]>([]);
@@ -50,15 +68,14 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      {/* Header */}
+    <main className="min-h-screen p-4 md:p-8 bg-gray-900 text-white">
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-red-500 mb-2">
           🎵 YouTube Music Archive
@@ -78,9 +95,7 @@ export default function Home() {
               アーカイブ中...
             </>
           ) : (
-            <>
-              📥 今すぐアーカイブ
-            </>
+            <>📥 今すぐアーカイブ</>
           )}
         </button>
       </header>
@@ -91,7 +106,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Archive Selector */}
       {archives.length > 0 && (
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-400 mb-2">
@@ -115,23 +129,44 @@ export default function Home() {
         </div>
       )}
 
-      {/* Archive Info */}
       {selectedArchive && (
         <div className="bg-gray-800/50 rounded-lg p-4 mb-6">
           <h2 className="text-xl font-semibold mb-2">{selectedArchive.playlistTitle}</h2>
           <div className="text-sm text-gray-400 space-y-1">
             <p>📅 アーカイブ日: {selectedArchive.date}</p>
             <p>🎬 動画数: {selectedArchive.totalCount}件</p>
-            <p>🔗 プレイリストID: {selectedArchive.playlistId}</p>
           </div>
         </div>
       )}
 
-      {/* Video Grid */}
       {selectedArchive && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {selectedArchive.videos.map((video) => (
-            <VideoCard key={video.videoId} video={video} />
+            <a
+              key={video.videoId}
+              href={video.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group bg-gray-800/50 rounded-lg overflow-hidden hover:bg-gray-700/50 
+                       transition-all hover:scale-105"
+            >
+              <div className="relative aspect-video">
+                <img
+                  src={video.thumbnail}
+                  alt={video.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute top-2 left-2 bg-black/70 px-2 py-1 rounded text-xs">
+                  #{video.position}
+                </div>
+              </div>
+              <div className="p-3">
+                <h3 className="font-medium text-sm line-clamp-2 group-hover:text-red-400">
+                  {video.title}
+                </h3>
+              </div>
+            </a>
           ))}
         </div>
       )}
@@ -144,40 +179,5 @@ export default function Home() {
         </div>
       )}
     </main>
-  );
-}
-
-function VideoCard({ video }: { video: VideoItem }) {
-  return (
-    <a
-      href={video.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group bg-gray-800/50 rounded-lg overflow-hidden hover:bg-gray-700/50 
-               transition-all hover:scale-105 hover:shadow-xl"
-    >
-      <div className="relative aspect-video">
-        <img
-          src={video.thumbnail}
-          alt={video.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-        <div className="absolute top-2 left-2 bg-black/70 px-2 py-1 rounded text-xs">
-          #{video.position}
-        </div>
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 
-                      transition-colors flex items-center justify-center">
-          <span className="opacity-0 group-hover:opacity-100 text-4xl transition-opacity">
-            ▶
-          </span>
-        </div>
-      </div>
-      <div className="p-3">
-        <h3 className="font-medium text-sm line-clamp-2 group-hover:text-red-400 transition-colors">
-          {video.title}
-        </h3>
-      </div>
-    </a>
   );
 }
