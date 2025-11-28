@@ -50,17 +50,27 @@ export default function Home() {
 
   const triggerArchive = async () => {
     setTriggerLoading(true);
+    setError(null);
     try {
-      const response = await fetch('/api/cron');
+      const response = await fetch('/api/trigger', {
+        method: 'POST',
+      });
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+      
       if (data.success) {
         alert(`アーカイブ完了: ${data.videoCount}件の動画を保存しました`);
         fetchArchives();
       } else {
-        throw new Error(data.error);
+        throw new Error(data.error || 'Unknown error');
       }
     } catch (err) {
-      alert('エラー: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      setError(message);
+      alert('エラー: ' + message);
     } finally {
       setTriggerLoading(false);
     }
