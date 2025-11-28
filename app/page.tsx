@@ -93,21 +93,6 @@ export default function Home() {
         <p className="text-gray-400">
           トップ音楽プレイリストの月次アーカイブ
         </p>
-        <button
-          onClick={triggerArchive}
-          disabled={triggerLoading}
-          className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 
-                   rounded-lg transition-colors flex items-center gap-2"
-        >
-          {triggerLoading ? (
-            <>
-              <span className="animate-spin">⏳</span>
-              アーカイブ中...
-            </>
-          ) : (
-            <>📥 今すぐアーカイブ</>
-          )}
-        </button>
       </header>
 
       {error && (
