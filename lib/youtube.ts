@@ -1,9 +1,36 @@
-import { VideoItem, YouTubePlaylistResponse } from '@/types';
+import { VideoItem } from './storage';
 
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY!;
 const PLAYLIST_ID = 'PL4fGSI1pDJn4-UIb6RKHdxam-oAUULIGB';
 
+interface YouTubePlaylistResponse {
+  items: {
+    snippet: {
+      title: string;
+      position: number;
+      publishedAt: string;
+      resourceId: {
+        videoId: string;
+      };
+      thumbnails: {
+        high?: { url: string };
+        medium?: { url: string };
+        default?: { url: string };
+      };
+    };
+  }[];
+  nextPageToken?: string;
+  pageInfo: {
+    totalResults: number;
+  };
+}
+
 export async function fetchPlaylistItems(maxResults: number = 100): Promise<VideoItem[]> {
+  const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+  
+  if (!YOUTUBE_API_KEY) {
+    throw new Error('YOUTUBE_API_KEY is not set');
+  }
+
   const videos: VideoItem[] = [];
   let nextPageToken: string | undefined;
 
@@ -58,6 +85,12 @@ export async function fetchPlaylistItems(maxResults: number = 100): Promise<Vide
 }
 
 export async function getPlaylistInfo(): Promise<{ title: string; itemCount: number }> {
+  const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+  
+  if (!YOUTUBE_API_KEY) {
+    throw new Error('YOUTUBE_API_KEY is not set');
+  }
+
   const url = new URL('https://www.googleapis.com/youtube/v3/playlists');
   url.searchParams.append('part', 'snippet,contentDetails');
   url.searchParams.append('id', PLAYLIST_ID);
@@ -76,3 +109,5 @@ export async function getPlaylistInfo(): Promise<{ title: string; itemCount: num
     itemCount: data.items[0]?.contentDetails?.itemCount || 0,
   };
 }
+
+export { PLAYLIST_ID };
